@@ -1,0 +1,119 @@
+# @package _global_
+
+training:
+  model_save_start: 50
+  model_save_freq: 10
+  epochs: 3
+  batch_size: 64
+  num_workers: 4
+  sampler:
+    name: pk
+    p: 32
+    k: 2
+  data:
+    poison:
+      enabled: false
+    transforms:
+      forbid_geom_aug: true
+      normalize: false        # ← 保持 false。BiomedCLIP 内部会用自己的均值方差做 normalize
+      pixel_aug: false
+
+ue:
+  base_task_builder: mimic_cxr
+  store_dir: ${task.save_dir}/${task.run_name}/${now:%Y%m%d_%H%M%S}/noise
+  reid_margin: 0.2
+  
+  lpp:
+    last_k: 2
+    enabled: true
+    mode: "le"              # "le": SGLD；"sam": SAM
+    num_particles: 5
+    aggregate: "mean"       # "mean" | "cvar"
+    alpha: 0.8
+    param_filter: "auto"
+    amp: false          
+
+    trust_region:
+      enabled: true
+      r_rel: 0.05         # 半径 = max(r_abs, r_rel * ||θ0||)
+      r_abs: 1.0e-3
+
+    grad_clip_max_norm: 0   # <=0 关闭
+
+    sgld:                   # ← SGLD 专属
+      inner_steps: 3        # SGLD 内环步数 S
+      eta_w: 1.0e-4         # 步长 η
+      gamma: 1.0e-4         # 回拉 γ
+      sigma0: 1.0e-4        # 初始扰动
+
+    sam:                    # ← SAM 专属
+      radius: 5.0e-3        # 邻域半径 ρ
+
+  loss:
+    # === 语义保真 ===
+    semantic:
+      enabled: true
+      name: biomedclip                    # 预留枚举：biomedclip / biovil / medclip ...
+      hf_repo: microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224
+      img_size: 224                       # BiomedCLIP 的视觉塔输入
+      weight_for_log: 1.0                 # 仅用于日志可视化；不直接加到标量 loss，仍走“δ-空间梯度手术”
+      device: cuda                        # auto / cpu / cuda
+      dtype: float32                      # float32 建议；别用半精度跑裁判
+    # === 感知保真（hinge SSIM）===
+    perceptual:
+      enabled: true
+      tau: 0.02
+    # === δ-空间梯度手术的一些共用选项 ===
+    normalize: true
+
+    
+
+  key:
+    type: samplewise
+    from: field
+    field: meta.dicom_id
+
+  algorithm:
+    kind: training_based
+    name: ours_generator
+    params:
+      epsilon: 0.0313725      # 8/255
+      noise_step: 10
+      step_size: 0.0039215    # 1/255
+      surrogate_step: 20
+      tied_channels: true
+
+  eot:
+    enabled: false
+    n: 3
+    geom_aug: true
+    pix_aug: true
+    same_on_batch: false
+
+  surrogates:
+    s_reid:
+      reid: true
+      pretrained: true
+      drop_rate: 0.2
+      backbone: efficientnet_b2
+      embed_dim: 128
+      optimizer: { name: adam, lr: 1e-5, weight_decay: 5e-4, betas: [0.9, 0.9999], eps: 1.0e-8 }
+
+    s_cls:
+      pretrained: true
+      backbone: resnet50
+      drop_rate: 0.2
+      num_classes: 13
+      optimizer: { name: adam, lr: 1e-5, weight_decay: 5e-4, betas: [0.9, 0.9999], eps: 1.0e-8 }
+
+  io:
+    enabled: true
+    include_manifest: true
+    strategy: shards
+    shard_size: 2048
+    dtype: int8
+    save_from_epoch: 130
+    save_every: 10
+
+
+

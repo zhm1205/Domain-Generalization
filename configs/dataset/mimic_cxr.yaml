@@ -1,0 +1,7 @@
+name: mimic_cxr
+train_csv_path: /home/dengzhipeng/data/project/reid_ue/mimic_cxr/train_sub2_p70_10_20.csv
+val_csv_path: /home/dengzhipeng/data/project/reid_ue/mimic_cxr/val_sub2_p70_10_20.csv
+test_csv_path: /home/dengzhipeng/data/project/reid_ue/mimic_cxr/test_sub2_p70_10_20.csv
+image_folder: /home/dengzhipeng/data/project/reid_ue/mimic_cxr/images
+# Training-related settings like ``batch_size`` or ``num_workers`` should now be
+# specified under the root-level ``training`` section of the experiment config.

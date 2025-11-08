@@ -1,0 +1,50 @@
+# @package _global_          
+# merge this file to global config
+
+dataset:
+  task: classification
+
+model:
+  num_classes: 13
+
+training:
+  data:
+    transforms:
+      normalize: true
+      image_size: [1, 256, 256]
+  step: multi_label_cls_baseline
+  ce_weight: 1.0
+  use_focal_loss: false
+  use_weights: true
+  label_weights:
+    Enlarged Cardiomediastinum: 3.5
+    Cardiomegaly: 21.7
+    Lung Opacity: 24.6
+    Lung Lesion: 2.9
+    Edema: 13.7
+    Consolidation: 5.4
+    Pneumonia: 7.6
+    Atelectasis: 22.3
+    Pneumothorax: 5.5
+    Pleural Effusion: 27.3
+    Pleural Other: 0.9
+    Fracture: 1.9
+    Support Devices: 34.5
+  eval_on_train: false
+  
+evaluation:
+  per_class: true
+  class_names: 
+    - Enlarged Cardiomediastinum
+    - Cardiomegaly
+    - Lung Opacity
+    - Lung Lesion
+    - Edema
+    - Consolidation
+    - Pneumonia
+    - Atelectasis
+    - Pneumothorax
+    - Pleural Effusion
+    - Pleural Other
+    - Fracture
+    - Support Devices

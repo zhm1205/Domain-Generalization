@@ -1,0 +1,7 @@
+name: grape
+train_csv_path: /home/dengzhipeng/data/project/reid_ue/grape/train.csv
+val_csv_path: /home/dengzhipeng/data/project/reid_ue/grape/val.csv
+test_csv_path: /home/dengzhipeng/data/project/reid_ue/grape/test.csv
+image_folder: /home/dengzhipeng/data/project/reid_ue/grape/images
+# Training-related settings like ``batch_size`` or ``num_workers`` should now be
+# specified under the root-level ``training`` section of the experiment config.

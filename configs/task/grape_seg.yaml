@@ -1,0 +1,7 @@
+defaults:
+  - /_global_patches: grape_seg 
+  - _base
+
+name: grape_seg
+save_dir: /home/dengzhipeng/data/project/reid_ue/outputs/grape_seg
+eval_strategy: grape_seg

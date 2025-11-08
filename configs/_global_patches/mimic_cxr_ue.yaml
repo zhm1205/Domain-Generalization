@@ -1,0 +1,27 @@
+# @package _global_        
+
+dataset:
+  task: ue
+  
+model:
+  num_classes: 1
+
+training:
+  data:
+    transforms:
+      image_size: [1, 256, 256]
+  # Global training parameters (batch_size, learning_rate, num_workers, etc.)
+  # belong in the root-level ``training`` section.
+  # Only task-specific options remain here.
+  sampler:
+    name: pk
+    p: 32  # every batch 32 different patients
+    k: 2   # each patient 2 images
+  use_triplet_loss: true
+  triplet_loss_margin: 0.2
+
+
+ue:
+  algorithm:
+    params:
+      tied_channels: true

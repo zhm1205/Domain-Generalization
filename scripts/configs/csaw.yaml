@@ -1,0 +1,33 @@
+raw_data_folder: /home/dengzhipeng/data/breast/csaw_cc/2021-204-1-1/data
+metadata_csv: /home/dengzhipeng/data/breast/csaw_cc/2021-204/data/CSAW_CaseControl_WITHOUTHIDDEN_for_anon_dataset_210902.csv   # 含 anon_patientid, x_case, imagelaterality, viewposition, anon_filename 等列
+annotations_dir: /home/dengzhipeng/data/breast/csaw_cc/2021-204-1-1/data/anon_annotations_nonhidden
+
+output_folder: /home/dengzhipeng/data/project/reid_ue/breast/csaw_cc
+
+# 尺寸
+resize_train: [512, 512]
+resize_archive: [1024, 1024]
+
+# 叠罩
+overlay_alpha: 0.45
+
+# 划分
+split_ratios: [0.7, 0.1, 0.2]
+seed: 42
+
+# mask 尺寸不一致策略
+mismatch_policy: log_and_skip      # log_and_skip | auto_scale_if_uniform | force_resize
+mismatch_log_csv: mask_size_mismatches.csv
+uniform_scale_tol: 0.01            # 等比例容差（1%）
+
+# 点/面一致阈值（**核心**）：在 1024 尺度的面积阈值（像素）
+mask_area_threshold_px_1024: 30    # 你可改，例如 50；诊断与分割都用它
+
+# 其它
+compression_level: 3               # PNG 压缩等级
+
+# ===== 离线分类采样（作用于 train/val/test 一致） =====
+cls_balance_neg_per_pos: 1        # 1 表示 1:1；2 表示 1:2（负:正）
+cls_balance_seed: 2025
+m_neg_per_patient: 4              # 每个负患者在该 split 内最多被选入多少张
+balance_match_view: true          # 按 (Laterality,ViewPosition) 匹配正样本分布

@@ -1,0 +1,15 @@
+defaults:
+  - dataset: mimic_cxr
+  - model: resnet
+  - training: default
+  - task: mimic_cxr_cls
+  - _self_
+  - method: base
+
+
+hydra:
+  run:
+    dir: ${task.save_dir}/${task.run_name}/${now:%Y%m%d_%H%M%S}
+  output_subdir: .hydra     
+  job:
+    chdir: true            

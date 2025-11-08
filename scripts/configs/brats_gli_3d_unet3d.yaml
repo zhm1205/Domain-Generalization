@@ -1,0 +1,72 @@
+# ========================================
+# BraTS-GLI 3D Seg (UNet3D + Dice Evaluation)
+# ========================================
+
+experiment:
+  output_dir: /path/to/experiments/brats3d_unet    # 训练输出目录
+  seed: 42
+
+model:
+  name: unet3d          # 对应 src/models/unet3d.py 里 @register_model("unet3d")
+  in_channels: 4        # BraTS 四模态 t1c/t1n/t2f/t2w
+  num_classes: 2        # 背景/病灶（多类就改这里，同时评估会输出 per-class dice）
+  base_channels: 16
+  channels: [16, 32, 64, 128, 256]
+  up_bilinear: true
+  norm: instance
+  act: relu
+  dropout: 0.0
+
+dataset:
+  name: brats_gli_3d    # 对应 src/datasets/brats_gli_3d.py 里的 @register_dataset("brats_gli_3d")
+  patch_size: [96, 96, 96]
+  num_workers: 4
+  batch_size: 1
+
+  # 按你的目录改成实际路径
+  train:
+    root: /path/to/BraTS-GLI/training
+    random_crop: true
+    require_seg: true    # 训练必须有 seg
+
+  # 可选：若需要早停/调参，这里可以再切一部分 training 做 val
+  # 如果暂时不需要验证，可整段删掉或保持与 train 相同
+  val:
+    root: /path/to/BraTS-GLI/training
+    random_crop: false
+    require_seg: true
+
+  test:
+    root: /path/to/BraTS-GLI/validation
+    random_crop: false
+    require_seg: false   # validation 可能有无 seg 的样本；这里允许
+
+training:
+  max_epochs: 200
+  optimizer:
+    name: adamw
+    lr: 1.0e-4
+    weight_decay: 1.0e-5
+    # 可选：分组/冻结策略在 trainer_base 已支持 param groups 的话也能配
+  scheduler:
+    name: cosine
+    t_max: 200
+    min_lr: 1.0e-6
+  amp: true             # 如果你的 Trainer 支持混合精度
+  gradient_clip_norm: 0 # 0 表示关闭
+
+criterion:
+  name: dicece          # 你当前 SegTrainer 中用的 MONAI DiceCELoss 语义
+  include_background: false
+  squared_pred: false
+  jaccard: false
+  lambda_dice: 1.0
+
+evaluation:
+  strategy: seg_dice    # 对应 src/evaluation/seg_eval_dice.py 里 @register_evaluation_strategy("seg_dice")
+  include_background: false   # 是否把背景纳入平均 Dice
+  main_metric: dice_avg    # 判定 best
+
+logging:
+  log_interval: 20      # 每多少 iter 打印一次
+  ckpt_interval: 1      # 每多少 epoch 存一次

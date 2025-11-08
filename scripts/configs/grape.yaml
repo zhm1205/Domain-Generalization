@@ -1,0 +1,46 @@
+raw_data_folder: /home/dengzhipeng/data/fundus/GRAPE/data
+excel_path: /home/dengzhipeng/data/fundus/GRAPE/data/VF and clinical information.xlsx
+output_folder: /home/dengzhipeng/data/project/reid_ue/grape
+
+paths:
+  cfg_dir: "CFPs"
+  roi_dir: "ROI images"
+  ann_dir: "Annotated Images"
+  json_dir: "json"
+  out_roi_dir: "images"
+  out_masks_dir: "masks"
+
+resize:
+  roi: [256, 256]
+
+image_processing:
+  background_color: [0, 0, 0]
+  compression_level: 3
+
+reid:
+  min_studies_per_subject: 2
+
+splits:
+  train: 0.7
+  val: 0.10
+  test: 0.2
+  seed: 42
+
+excel:
+  baseline_sheet: "Baseline"
+  followup_sheet: "Follow-up"
+  # 如果自动识别不到 VF 列，就显式给出：
+  # vf_columns: ["VF1","VF2", "...", "VF61"]
+
+checks:
+  overlay_consistency: true
+  overlay_iou_threshold: 0.95
+  report_csv: "mask_consistency_report.csv"
+
+vis:
+  enable_overlay: true
+  overlay_dir: "vis"
+  alpha: 0.5
+
+filter:
+  require_mask: false 

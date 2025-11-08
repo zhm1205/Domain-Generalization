@@ -1,0 +1,7 @@
+defaults:
+  - /_global_patches: grape_ue 
+  - _base
+
+name: grape_ue
+save_dir: /home/dengzhipeng/data/project/reid_ue/outputs/grape_ue
+eval_strategy: null

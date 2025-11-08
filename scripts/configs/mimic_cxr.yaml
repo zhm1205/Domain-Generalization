@@ -1,0 +1,62 @@
+# configs/scripts/mimic_cxr.yaml
+
+# Root folder that contains BOTH:
+# 1) The three official CSV files (already decompressed to .csv):
+#    - mimic-cxr-2.0.0-split.csv
+#    - mimic-cxr-2.0.0-metadata.csv
+#    - mimic-cxr-2.0.0-chexpert.csv
+# 2) The image tree directly under this folder:
+#    p10/, p11/, ... each containing p{subject_id}/s{study_id}/{dicom_id}.jpg
+#    (Do NOT nest under a "files/" subfolder.)
+raw_data_folder: /home/dengzhipeng/data/chest/mimic_cxr_unzipped
+
+# Where to write outputs (CSVs for ReID & classification, and shared processed images)
+output_folder: /home/dengzhipeng/data/project/reid_ue/mimic_cxr
+
+# Optional. If omitted, code will default to `${output_folder}/images`.
+# This is the SINGLE shared directory for all processed PNGs to avoid duplicates.
+# output_images_dir: /home/dengzhipeng/data/project/reid_ue/mimic_cxr/images
+
+# Target size for processed images: [width, height]
+resize: [256, 256]
+
+# Image processing options
+image_processing:
+  # Background (padding) color for grayscale images: 0=black, 255=white
+  background_color: 0
+  # PNG compression level (0-9): higher = smaller files, slower to save
+  compression_level: 3
+
+# ReID filtering configuration
+# Keep only frontal views; valid values in MIMIC-CXR include "PA" and "AP"
+frontal_views: ["PA", "AP"]
+# Retain only patients with at least this many unique studies
+min_studies_per_patient: 2
+
+# Train/val/test ratios used when split_strategy="rebalanced"
+# (Splits are done at the patient level to prevent leakage.)
+target_train_ratio: 0.85
+target_val_ratio: 0.05
+target_test_ratio: 0.10
+
+
+# === New: subset-resplit（仅用配置驱动） ===
+subset_resplit:
+  enabled: true
+  tag: sub2_p70_10_20
+  fraction: 0.02
+  ratios: [0.7, 0.1, 0.2]
+  seed: 42
+
+  # 关键：按“study”来分层 + 轻度上限
+  bucket_by: n_studies         # 用 study 分桶与配额
+  bucket_mode: fixed
+  fixed_edges: [2, 3, 5, 10]   # [2], [3], [4-5], [6-10], >10
+  min_images_per_patient: 2
+  min_studies_per_patient: 2   # 严格过滤：study >= 2
+  prefer_min_studies: null     # 不再优先更多 study，避免均值被拉高
+  tolerance: 0.01
+
+  cap:
+    per_study_images: null        # 每个 study 最多 2 张
+    per_patient_images: null      # 每个病人最多 12 张（=> 最多 ~12 个 study）

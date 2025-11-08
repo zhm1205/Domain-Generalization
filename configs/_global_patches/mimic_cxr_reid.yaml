@@ -1,0 +1,55 @@
+# @package _global_        
+
+dataset:
+  task: reid
+
+model:
+  reid: true
+  embed_dim: 128
+
+training:
+  data:
+    transforms:
+      normalize: true
+      image_size: [1, 256, 256]
+  # Global training parameters (batch_size, learning_rate, num_workers, etc.)
+  # belong in the root-level ``training`` section.
+  # Only task-specific options remain here.
+  step: reid_baseline
+  sampler:
+    name: pk
+    p: 32  # every batch 32 different patients
+    k: 2   # each patient 2 images
+  use_triplet_loss: true
+  triplet_loss_margin: 0.2
+  eval_on_train: true
+
+
+evaluation:
+  reid:
+    primary_metric: patient.rank@1
+    modes: 
+      - patient
+      - cross_study.filtered
+
+    topk_list: [1, 5, 10, 20, 50, 100]
+    map_at: 100            # Additionally calculate mAP@100; set to null to only calculate full mAP
+    normalize: true        # L2-normalize embeddings during evaluation (to match your training)
+    index_backend: numpy   # Use numpy for now as data volume is not large; can switch to faiss later
+
+    # Data field mapping (according to your dataloader's batch field names)
+    fields:
+      image: image
+      pid: subject_id
+      sid: study_id
+      imgid: dicom_id
+
+    # Output and Logging (optional)
+    report:
+      save_json: true
+      json_path: ${task.save_dir}/val_reid_metrics_epoch_${training.epoch}.json
+      log_keys:                # Which keys to highlight in the console log
+        - patient.rank@1
+        - patient.map
+        - cross_study.filtered.rank@1
+        - cross_study.filtered.map

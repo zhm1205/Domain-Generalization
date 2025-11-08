@@ -1,0 +1,7 @@
+defaults:
+  - /_global_patches: mimic_cxr_cls 
+  - _base
+
+name: mimic_cxr_cls
+save_dir: /home/dengzhipeng/data/project/reid_ue/outputs/mimic_cxr_cls
+eval_strategy: mimic_cxr_cls
